@@ -9,33 +9,31 @@ namespace всякое
 {
     class Program
     {
+        
         class Dot
         {
-            internal short myCost;
             internal short myNumber;
-            internal List<Move> moves = new List<Move>();
-            internal void AddMove(Move move)
+            internal List<short> moves = new List<short>();
+            internal void AddMove(short move)
             {
                 moves.Add(move);
             }
         }
-        class Move
-        {
-            internal short cost;
-            internal short FromOwner;
-            internal Move( short cost1, short FromOwner1)
-            { 
-                cost = cost1;
-                FromOwner = FromOwner1;
-            }
-        }
+
 
         static void Main(string[] args)
         {
+            void alert(string txt)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine(txt);
+                Console.ResetColor();
+            }
             List<Dot> dots = new List<Dot>();
             List<short> dots_inner = new List<short>();
-            
-            Console.WriteLine("Matrix is");
+
+
+            alert("Matrix is");
 
             List<string> matrix_rows = new List<string>();
             string[] matrix = File.ReadAllLines(Environment.CurrentDirectory+@"/lab1/matrix.txt");
@@ -61,7 +59,7 @@ namespace всякое
             {
                 str = str1;
                 row++;
-                //Console.WriteLine(str);
+                Console.WriteLine(str);
                 CanItBeInner = true;
                 dots.Add(new Dot());
                 for (short i = 0; i < matrix_rows[row].Length; i++)
@@ -69,11 +67,10 @@ namespace всякое
                     cost = Int16.Parse(str.Substring(0,str.IndexOf('.')));//принимает значение из матрицы цен
                     str = str.Substring(str.IndexOf('.')+1);
                     
-                    if (i != dots.Count - 1)
-                    {
+                    
                         if (matrix_rows[row][i] == '1')//если есть влияние на нее
                         {
-                            dots[dots.Count - 1].AddMove(new Move(cost, (short)(i + 1)));
+                          
                             CanItBeInner = false;//точно не вход т.к на него оказывается воздействет
                             //если это влияние идет из точки, которая состоит в группе предположительных выходов, то удалить ее от тудова
                             for (short a = 0; a < dots_ext.Count; a++)//перечисляем все точки, чтобы затем убрать те, которые точно не выход
@@ -83,12 +80,10 @@ namespace всякое
                                     break;
                                 }
                         }
-                    }
-                    else
-                    {
-                        //если главная диагональ
-                        dots[dots.Count - 1].myCost = cost;
-                    }
+                        
+                            dots[dots.Count - 1].AddMove(cost);
+                    
+                    
                 }
                 if(CanItBeInner)
                 {
@@ -103,13 +98,105 @@ namespace всякое
             Console.WriteLine("");
 
             for(short i=0;i< dots_inner.Count;i++)
-                Console.WriteLine("inner: "+ dots_inner[i]);
+                alert("inner: "+ dots_inner[i]);
             for (short i = 0; i < dots_ext.Count; i++)
-                Console.WriteLine("exit: " + dots_ext[i]);
+                alert("exit: " + dots_ext[i]);
 
-            Console.ReadKey(true);
             Console.WriteLine("");
-            Console.WriteLine("now 2.3: rearrangement(inputs first, outputs at the end)");
+
+
+
+
+            alert("Objects in List of classes");//чисто проверка. Если матрица идентича изначальной то программа работает верно
+            for (short i = 0; i < dots.Count; i++)
+            {
+                for (short y = 0; y < dots[i].moves.Count; y++)
+                    if (dots[i].moves[y]!=0 || y==i)
+                        Console.Write("1");
+                    else
+                        Console.Write("0");
+                Console.WriteLine("");
+            }
+
+            Console.WriteLine("now 2.2");
+            alert("Какую вершину вы хотите исключить?");
+
+            short iskl = (short)(Convert.ToInt16(Console.ReadLine())-1);
+            Console.WriteLine("");
+
+            
+
+            for (short i =0; i<dots.Count;i++)
+            {
+                if(i!= iskl)
+                { 
+                    dots[iskl].moves[i] = 0;
+                    dots[i].moves[iskl] = 0;
+                }
+
+                    
+
+            }
+
+            alert("Matrix with null element");//чисто проверка
+            for (short i = 0; i < dots.Count; i++)
+            {
+                if(i==iskl)
+                    Console.ForegroundColor = ConsoleColor.Green;
+                for (short y = 0; y < dots[i].moves.Count; y++)
+                    if (dots[i].moves[y] != 0 || y == i)
+                        Console.Write("1");
+                    else
+                    {
+                        if (y == iskl)
+                            Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("0");
+                        if (i != iskl)
+                            Console.ResetColor();
+                    }
+                if (iskl==i)
+                    Console.Write(" - null");
+                Console.WriteLine("");
+                Console.ResetColor();
+            }
+
+            short temp_move;
+            for (short i = 0; i < dots.Count; i++)
+            {
+                temp_move = dots[i].moves[dots.Count - 1];
+                dots[i].moves[dots.Count - 1] = dots[i].moves[iskl];
+                dots[i].moves[iskl] = temp_move;
+            }
+            for (short i = 0; i < dots.Count; i++)
+            {
+                temp_move = dots[dots.Count - 1].moves[i];//неверно переворачивает низ
+                dots[dots.Count - 1].moves[i] = dots[iskl].moves[i];
+                dots[iskl].moves[i] = temp_move;
+            }
+
+
+
+            alert("Matrix with null element in the end");//чисто проверка
+            for (short i = 0; i < dots.Count; i++)
+            {
+                
+                for (short y = 0; y < dots[i].moves.Count; y++)
+                    if (dots[i].moves[y] != 0)
+                        Console.Write("1");
+                    else
+                    {
+                       
+                        Console.Write("0");
+                      
+                    }
+
+                Console.WriteLine("");
+
+            }
+
+
+
+            alert("now 2.3: rearrangement(inputs first, outputs at the end)");
 
 
            
